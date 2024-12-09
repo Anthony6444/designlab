@@ -5,9 +5,8 @@
 // Must match the sender structure
 
 int ledPin = 2;
-uint8_t ledSpeed[7] = { 25, 26, 27, 32, 33, 12, 13 };
-uint8_t ledDir[7] = { 16, 17, 18, 19, 21, 22, 23 };
-
+int motorForwardPin = 12;
+int motorReversePin = 14;
 
 typedef struct struct_message {
   bool channel0;
@@ -28,10 +27,18 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
   Serial.print(",dir:");
   Serial.println(recvData.direction);
   digitalWrite(ledPin, (bool)recvData.channel0);
-  int binSpeed = constrain((int)(recvData.speed * 7), 0, 7);
-  int binDir = constrain((int)(((recvData.direction + 1.0) / 2.0) * 7), 0, 6);
-  for (int i = 0; i < 7; i++) digitalWrite(ledSpeed[i], i < binSpeed ? HIGH : LOW);
-  for (int i = 0; i < 7; i++) digitalWrite(ledDir[i], i == binDir ? HIGH : LOW);
+
+  if (recvData.speed > 0.2) {
+    digitalWrite(motorForwardPin, 1);
+    digitalWrite(motorReversePin, 0);
+  } else if (recvData.speed < -0.2) {
+    digitalWrite(motorReversePin, 1);
+    digitalWrite(motorForwardPin, 0);
+  } else {
+    digitalWrite(motorForwardPin, 0);
+    digitalWrite(motorReversePin, 0);
+  }
+
 }
 
 void setup() {
@@ -52,24 +59,11 @@ void setup() {
   esp_now_register_recv_cb(esp_now_recv_cb_t(OnDataRecv));
 
   pinMode(ledPin, OUTPUT);
-  for (int i = 0; i < 7; i++) {
-    pinMode(ledSpeed[i], OUTPUT);
-    pinMode(ledDir[i], OUTPUT);
-  }
-  for (int i = 0; i < 7; i++) {
-    digitalWrite(ledSpeed[i], HIGH);
-    digitalWrite(ledDir[i], HIGH);
-    delay(50);
-    digitalWrite(ledDir[i], LOW);
-  }
-  delay(500);
-  for (int i = 6; i >= 0; i--) {
-    digitalWrite(ledSpeed[i], LOW);
-    digitalWrite(ledDir[i], HIGH);
-    delay(50);
-    digitalWrite(ledDir[i], LOW);
-  }
 }
 
 void loop() {
+  digitalWrite(ledPin, 1);
+  delay(200);
+  digitalWrite(ledPin, 0);
+  delay(400);
 }
