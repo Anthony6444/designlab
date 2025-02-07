@@ -1,9 +1,6 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
-// Structure example to receive data
-// Must match the sender structure
-
 #define LED_PIN 2
 
 #define M1A 25
@@ -53,6 +50,7 @@ class Motor {
     }
 
     void drive(float speed) {
+      if (reversed) speed *= -1;
       if (speed > 0.1) {
         forward(speed);
       } else if (speed < -0.1) {
@@ -109,7 +107,7 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT);
   left.init(M1A, M1B, M1PWM, false);
-  right.init(M2A, M2B, M2PWM, true);
+  right.init(M2A, M2B, M2PWM, false);
 
 }
 
