@@ -2,6 +2,7 @@
 #include <WiFi.h>
 
 #define LED_PIN 2
+#define BUZZER 16
 
 #define M1A 25
 #define M1B 26
@@ -72,12 +73,13 @@ typedef struct struct_message {
   float leftY;
   float rightX;
   float rightY;
-  int message;
+  bool horn;
 } struct_message;
 
 // Create a struct_message called recvData
 struct_message recvData;
 bool newData = false;
+bool hornButton = false;
 
 // callback function that will be executed when data is received
 void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
@@ -106,6 +108,7 @@ void setup() {
   esp_now_register_recv_cb(esp_now_recv_cb_t(onDataRecv));
 
   pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
   left.init(M1A, M1B, M1PWM, false);
   right.init(M2A, M2B, M2PWM, false);
 
@@ -162,7 +165,14 @@ void loop() {
         left.drive(recvData.leftY);
         right.drive(recvData.rightY);
     }
-
+    
+    if (recvData.horn) {
+      digitalWrite(LED_PIN, HIGH);
+      digitalWrite(BUZZER, HIGH);
+    } else {
+      digitalWrite(LED_PIN, LOW);
+      digitalWrite(BUZZER, LOW);
+    }
     newData = false;
   }
   delay(100);

@@ -7,6 +7,7 @@
 #define LEFT_Y_PIN 35    // gpio 35 (adc1_ch7)
 
 #define LEFT_BUTTON 25
+#define RIGHT_BUTTON 19
 
 #define PWR_LED 22
 #define COM_LED 23
@@ -55,7 +56,7 @@ typedef struct struct_message {
   float leftY;
   float rightX;
   float rightY;
-  int message;
+  bool horn;
 } struct_message;
 
 SlewRateLimiter speedlim;
@@ -102,6 +103,7 @@ void setup() {
 
   // set pin types
   pinMode(LEFT_BUTTON, INPUT_PULLUP);
+  pinMode(RIGHT_BUTTON, INPUT_PULLUP);
   pinMode(PWR_LED, OUTPUT);
   pinMode(COM_LED, OUTPUT);
 
@@ -123,6 +125,7 @@ void setup() {
 void loop() {
   // Set values to send
   bool modeButtonState = !digitalRead(LEFT_BUTTON);
+  bool hornButtonState = !digitalRead(RIGHT_BUTTON);
   float leftY  = (analogRead(LEFT_Y_PIN)  / 4095.0) * 2 - 1;    // tank left; ARCADE speed
   float leftX  = 0;                                             // unused
   float rightX = (analogRead(RIGHT_X_PIN) / 4095.0) * 2 - 1;    // ARCADE direction
@@ -145,9 +148,12 @@ void loop() {
   sendData.leftX = leftX*leftX    *  sgn(leftX);
   sendData.rightX = rightX*rightX *  sgn(rightX);
   sendData.rightY = rightY*rightY * -sgn(rightY);
+  sendData.horn = hornButtonState;
 
   Serial.print(",ModeState:");
   Serial.print(sendData.mode); 
+  Serial.print(",Horn:");
+  Serial.print(sendData.horn); 
   Serial.print(",LX:");
   Serial.print(sendData.leftX); 
   Serial.print(",LY:");
