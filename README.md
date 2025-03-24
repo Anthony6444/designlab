@@ -1,3 +1,3 @@
-# Design Lab -- ENR 280 Fall24/Spring25
+# ENR 281 Design Lab
 
-This contains arduino code for the project
+This is arduino code for an ESP32 based remote and car combination communicating over ESP-NOW.
